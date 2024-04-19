@@ -5,6 +5,7 @@ public class Task {
     private String description;
     private LocalDate dueDate;
     private int priority;
+    private boolean isTaskComplete;
 
     public Task(String title, String description, LocalDate dueDate, int priority) {
         this.title = title;
@@ -30,6 +31,10 @@ public class Task {
         return priority;
     }
 
+    public boolean isCompleted(){
+        return isTaskComplete;
+    }
+
     //setters
     public void setTitle(String title) {
         this.title = title;
@@ -47,8 +52,12 @@ public class Task {
         this.priority = priority;
     }
 
+    public void setCompleted(boolean isTaskComplete){ this.isTaskComplete = isTaskComplete; }
+
     @Override
     public String toString() {
-        return title + " Due: " + dueDate;
+
+        String status = isTaskComplete ? "[Completed] " : "";
+        return status + title + " Due: " + dueDate;
     }
 }
