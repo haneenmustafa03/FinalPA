@@ -71,6 +71,13 @@ public class MainWindow extends JFrame {
     }
 
     private void addTask(String title, String description, String dueDateString) {
+
+        //Check if any boxes are left empty
+        if(title.isEmpty() || description.isEmpty() || dueDateString.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Error: Text field(s) left empty. Please fill in all fields.");
+            return;
+        }
+
         //Check if date is inputted correctly
         if(!dueDateString.matches("\\d{4}-\\d{2}-\\d{2}")) {
             JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD, include dashes.");
