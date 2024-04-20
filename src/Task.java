@@ -58,6 +58,6 @@ public class Task {
     public String toString() {
 
         String status = isTaskComplete ? "[Completed] " : "";
-        return status + title + " Due: " + dueDate;
+        return status + title + "-" + description + " Due: " + dueDate;
     }
 }
