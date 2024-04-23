@@ -10,6 +10,7 @@ Email: nataliehodnett@ufl.edu
 
 - Haneen Mustafa
 UF ID: 98377371
+Email: haneenmustafa@ufl.edu
 
 # **💡Project Idea**
 The idea behind this project is to be able to create Task Manager that helps you track of all the tasks that you need to complete. 
