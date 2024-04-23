@@ -55,7 +55,7 @@ public class TaskServer {
 
     public static void main(String[] args) {
         try {
-            new TaskServer(77371); //Port number last 5 digits of UFID.
+            new TaskServer(7371); //Port number last 5 digits of UFID.
         } catch (IOException e) {
             System.out.println("Error! Server not started... " + e.getMessage());
         }

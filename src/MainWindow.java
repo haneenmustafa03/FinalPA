@@ -1,23 +1,32 @@
-import javax.print.DocFlavor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 
 public class MainWindow extends JFrame {
-    private TaskManager taskManager;
+    private TaskClient taskClient;
     private DefaultListModel<String> taskListModel;
     private JList<String> taskList;
 
     public MainWindow() {
-        super("Time Management Application"); //Title of JFrame
-        taskManager = new TaskManager();
+        super("Time Management Application"); //Title of JFrame, maybe change it to something more interesting later?
+        initializeNetworkConnection();
         initializeComponents();
         layoutComponents();
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
+    }
+
+    private void initializeNetworkConnection() {
+        try {
+            taskClient = new TaskClient("localhost", 7371); //Port number is last 4 of UFID
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Connection FAILED: " + e.getMessage());
+            System.exit(1); //exits if connection fails
+        }
     }
 
     private void initializeComponents() {
@@ -26,13 +35,14 @@ public class MainWindow extends JFrame {
         loadTasks();
     }
 
+    //Using Java SWING for the gui
     private void layoutComponents() {
-        setLayout(new BorderLayout()); // Set the layout of the JFrame
+        setLayout(new BorderLayout());
         JPanel taskPanel = new JPanel(new BorderLayout());
         taskPanel.add(new JScrollPane(taskList), BorderLayout.CENTER);
         add(taskPanel, BorderLayout.CENTER);
 
-        //add new tasks
+        //Add tasks
         JPanel formPanel = new JPanel(new GridLayout(0, 2));
         JTextField titleField = new JTextField();
         JTextField descField = new JTextField();
@@ -49,76 +59,50 @@ public class MainWindow extends JFrame {
         formPanel.add(addButton);
         formPanel.add(completeButton);
 
-        //gives add button functionality
-        addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addTask(titleField.getText(), descField.getText(), dueDateField.getText());
-                titleField.setText("");
-                descField.setText("");
-                dueDateField.setText("");
-            }
+        //Gives add button functionality
+        addButton.addActionListener(e -> {
+            addTask(titleField.getText(), descField.getText(), dueDateField.getText());
+            titleField.setText("");
+            descField.setText("");
+            dueDateField.setText("");
         });
 
-        //gives complete button functionality
-        completeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                completeSelectedTask();;
-            }
-        });
+        //Gives complete button functionality
+        completeButton.addActionListener(e -> completeSelectedTask());
 
         add(formPanel, BorderLayout.SOUTH);
     }
 
     private void addTask(String title, String description, String dueDateString) {
-
-        //Check if any boxes are left empty
-        if(title.isEmpty() || description.isEmpty() || dueDateString.isEmpty()){
+        // Validate input
+        if (title.isEmpty() || description.isEmpty() || dueDateString.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Error: Text field(s) left empty. Please fill in all fields.");
             return;
         }
-
-        //Check if date is inputted correctly
-        if(!dueDateString.matches("\\d{4}-\\d{2}-\\d{2}")) {
+        if (!dueDateString.matches("\\d{4}-\\d{2}-\\d{2}")) {
             JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD, include dashes.");
             return;
         }
 
-        //Parse and make sure that year month and day values are correct
-        String [] separateDateDigits = dueDateString.split("-");
-        int year = Integer.parseInt(separateDateDigits[0]);
-        int month = Integer.parseInt(separateDateDigits[1]);
-        int day = Integer.parseInt(separateDateDigits[2]);
-
-        //Validate month is between one and 12, and day is between 1 and 31
-        if (month < 1 || month > 12 || day < 1 || day > 31){
-            JOptionPane.showMessageDialog(this,"Invalid date vales. Please follow correct format YYYY-MM-DD.");
-            return;
+        try {
+            LocalDate dueDate = LocalDate.parse(dueDateString); // Parse the date string
+            Task newTask = new Task(title, description, dueDate, 1); // Priority is fixed for simplicity
+            taskClient.addTask(newTask); // Send task to server to add
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to add task: " + e.getMessage());
         }
-
-        //Validate single digit months have a zero in front
-        if(month < 10 && separateDateDigits[1].charAt(0) != '0'){
-            JOptionPane.showMessageDialog(this, "Invalid month format. Use 0M for single digit months.");
-            return;
-        }
-
-        //Validate single digit days
-        if(day < 10 && separateDateDigits[2].charAt(0) != '0'){
-            JOptionPane.showMessageDialog(this, "Invalid month format. Use 0M for single digit months.");
-            return;
-        }
-
-        //Adds task with correct due date
-        LocalDate dueDate = LocalDate.parse(dueDateString); //Parse date string
-        Task newTask = new Task(title, description, dueDate, 1); //Priority is fixed for simplicity
-        taskManager.addTask(newTask);
-        updateTaskList();
     }
 
     private void loadTasks() {
-        taskListModel.clear();
-        for (Task task : taskManager.getTasks()) {
-            taskListModel.addElement(task.toString());
+        try {
+            List<Task> tasks = taskClient.fetchTasks();  // Fetch the task list from the server
+            taskListModel.clear();  // Clear existing contents
+            for (Task task : tasks) {
+                taskListModel.addElement(task.toString());  // Add each task to the list model
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading tasks from server: " + e.getMessage());
+            taskListModel.addElement("Failed to load tasks, try refreshing!");
         }
     }
 
@@ -129,24 +113,18 @@ public class MainWindow extends JFrame {
     private void completeSelectedTask() {
         int index = taskList.getSelectedIndex();
         if (index != -1) {
-            //Retrieves selected task
-            Task selectedTask = taskManager.getTasks().get(index);
-
-            //Marks the task selected as complete
-            selectedTask.setCompleted(true);
-
-            updateTaskList();
+            try {
+                taskClient.completeTask(index); //This asks the server to mark the specified task complete (using index)
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "ERROR MARKING TASK COMPLETE: " + e.getMessage());
+            }
         } else {
             JOptionPane.showMessageDialog(this, "No task selected.");
         }
-
     }
 
-
+    //main is only one line yay
     public static void main(String[] args) {
         new MainWindow();
     }
-
 }
-
-
