@@ -35,11 +35,11 @@ public class TaskClient {
     }
 
     public List<Task> fetchTasks() throws IOException, ClassNotFoundException {
-        output.writeUTF("GET_TASKS");  // Command the server recognizes to send back task list
+        output.writeUTF("Get_Tasks");
         output.flush();
 
-        Object response = input.readObject();  // Assume server sends a serialized List<Task>
-        return (List<Task>) response;  // Cast and return the response
+        Object response = input.readObject();
+        return (List<Task>) response;
     }
 
     //Test
