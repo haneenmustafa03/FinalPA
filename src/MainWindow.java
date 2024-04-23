@@ -11,13 +11,13 @@ public class MainWindow extends JFrame {
     private JList<String> taskList;
 
     public MainWindow() {
-        super("Time Management Application"); // Set the title of the JFrame
+        super("Time Management Application"); //Title of JFrame
         taskManager = new TaskManager();
         initializeComponents();
         layoutComponents();
-        pack(); // Size the frame
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close operation
-        setVisible(true); // Make the frame visible
+        pack();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
     }
 
     private void initializeComponents() {
@@ -32,7 +32,7 @@ public class MainWindow extends JFrame {
         taskPanel.add(new JScrollPane(taskList), BorderLayout.CENTER);
         add(taskPanel, BorderLayout.CENTER);
 
-        // Form to add new tasks
+        //add new tasks
         JPanel formPanel = new JPanel(new GridLayout(0, 2));
         JTextField titleField = new JTextField();
         JTextField descField = new JTextField();
@@ -109,14 +109,13 @@ public class MainWindow extends JFrame {
         }
 
         //Adds task with correct due date
-        LocalDate dueDate = LocalDate.parse(dueDateString); // Parse the date string
-        Task newTask = new Task(title, description, dueDate, 1); // Priority is fixed for simplicity
+        LocalDate dueDate = LocalDate.parse(dueDateString); //Parse date string
+        Task newTask = new Task(title, description, dueDate, 1); //Priority is fixed for simplicity
         taskManager.addTask(newTask);
         updateTaskList();
     }
 
     private void loadTasks() {
-        // Here, you could load tasks from a file or database in a real application
         taskListModel.clear();
         for (Task task : taskManager.getTasks()) {
             taskListModel.addElement(task.toString());
@@ -145,7 +144,7 @@ public class MainWindow extends JFrame {
 
 
     public static void main(String[] args) {
-        new MainWindow(); // Launch the application
+        new MainWindow();
     }
 
 }
