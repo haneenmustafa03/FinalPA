@@ -1,28 +1,50 @@
 import java.io.*;
 import java.net.*;
-import java.time.LocalDate;
+import java.util.List;
 
 public class TaskClient {
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
+    private MainWindow mainWindow;
 
-    public TaskClient(String serverAddress, int serverPort) {
+    public TaskClient(String serverAddress, int serverPort, MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
         try {
-            socket = new Socket(serverAddress, serverPort); // Connect to the server
+            socket = new Socket(serverAddress, serverPort);
             output = new ObjectOutputStream(socket.getOutputStream());
             input = new ObjectInputStream(socket.getInputStream());
+            new Thread(this::handleServerResponse).start();
         } catch (IOException e) {
             System.err.println("Failed to connect to the server: " + e.getMessage());
         }
     }
 
+    private void handleServerResponse() {
+        try {
+            while (true) {
+                Object response = input.readObject();
+                if (response instanceof List<?>) {
+                    @SuppressWarnings("unchecked")
+                    List<Task> updatedTaskList = (List<Task>) response;
+                    mainWindow.updateTaskList(updatedTaskList);
+                } else if (response instanceof String) {
+                    String notification = (String) response;
+                    mainWindow.taskCompletedNotification(notification);
+                } else {
+                    System.out.println("Unexpected response from server");
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error handling server response: " + e.getMessage());
+        }
+    }
+
     public void addTask(Task task) {
         try {
-            output.writeUTF("ADD"); // Send command to server
-            output.writeObject(task); // Send the Task object
+            output.writeUTF("ADD");
+            output.writeObject(task);
             output.flush();
-            System.out.println(input.readUTF()); // Receive confirmation from server
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,10 +52,9 @@ public class TaskClient {
 
     public void completeTask(int index) {
         try {
-            output.writeUTF("COMPLETE"); // Send command to server
-            output.writeInt(index); // Send index of task to complete
+            output.writeUTF("COMPLETE");
+            output.writeInt(index);
             output.flush();
-            System.out.println(input.readUTF()); // Receive confirmation from server
         } catch (IOException e) {
             e.printStackTrace();
         }

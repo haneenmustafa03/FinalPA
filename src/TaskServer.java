@@ -1,19 +1,19 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TaskServer {
     private ServerSocket serverSocket;
     private TaskManager taskManager;
 
     public TaskServer(int port) throws IOException {
-        serverSocket = new ServerSocket(port); // Create server socket
+        serverSocket = new ServerSocket(port);
         taskManager = new TaskManager();
     }
 
     public void start() {
-        Thread serverThread = new Thread(() -> {
-            clientConnectionHandler(); // Handles client connections
-        });
+        Thread serverThread = new Thread(this::clientConnectionHandler);
         serverThread.start();
     }
 
@@ -21,13 +21,9 @@ public class TaskServer {
         try {
             System.out.println("Server started. Awaiting client connection...");
             while (true) {
-                Socket clientSocket = serverSocket.accept(); // Accepts client connection
+                Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connection accepted.");
-
-                // Handle client connection in a separate thread
-                Thread clientThread = new Thread(() -> {
-                    handleClient(clientSocket);
-                });
+                Thread clientThread = new Thread(() -> handleClient(clientSocket));
                 clientThread.start();
             }
         } catch (IOException e) {
@@ -49,17 +45,17 @@ public class TaskServer {
             while ((command = input.readUTF()) != null) {
                 switch (command) {
                     case "ADD":
-                        Task task = (Task) input.readObject(); // Read the task object sent by the client
-                        taskManager.addTask(task); // Adds the task to the task manager
-                        output.writeUTF("Task added successfully"); // Let the client know that the task was successfully added
+                        Task task = (Task) input.readObject();
+                        taskManager.addTask(task);
+                        output.writeUnshared(taskManager.getTasks());
                         break;
                     case "COMPLETE":
                         int index = input.readInt();
-                        taskManager.getTasks().get(index).setCompleted(true); // Set the task as completed
-                        output.writeUTF("Task completed successfully"); // Let client know that complete task was successful
+                        taskManager.getTasks().get(index).setCompleted(true);
+                        output.writeUTF("Task completed: " + taskManager.getTasks().get(index).getTitle());
                         break;
                     default:
-                        output.writeUTF("Command not recognized"); // Return an error for commands not recognized
+                        output.writeUTF("Command not recognized");
                         break;
                 }
                 output.flush();
