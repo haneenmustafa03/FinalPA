@@ -40,4 +40,4 @@ In the client terminal, run the following command:
 Java MainWindow
 ```
 
-Finally, interact with the GUI on the client side!  
+Finally, interact with the GUI on the client side to add and complete tasks!  
