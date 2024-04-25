@@ -6,12 +6,13 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.util.List;
 
+// Main window class inheriting from JFrame to create a GUI window
 public class MainWindow extends JFrame {
     private TaskClient taskClient;
     private DefaultListModel<String> taskListModel;
     private JList<String> taskList;
 
-
+//Constructor for Main Window
     public MainWindow() {
         super("Time Management Application");
         initializeNetworkConnection();
@@ -22,6 +23,7 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
+    // Method to initialize the network connection
     private void initializeNetworkConnection() {
         try {
             taskClient = new TaskClient("localhost", 2711, this);
@@ -31,11 +33,13 @@ public class MainWindow extends JFrame {
         }
     }
 
+    // Method to initialize GUI components
     private void initializeComponents() {
         taskListModel = new DefaultListModel<>();
         taskList = new JList<>(taskListModel);
     }
 
+    // Method to layout GUI components
     private void layoutComponents() {
         setLayout(new BorderLayout());
         JPanel taskPanel = new JPanel(new BorderLayout());
@@ -49,6 +53,7 @@ public class MainWindow extends JFrame {
         JButton addButton = new JButton("Add Task");
         JButton completeButton = new JButton("Complete Task");
 
+        // Add components to form panel
         formPanel.add(new JLabel("Title:"));
         formPanel.add(titleField);
         formPanel.add(new JLabel("Description:"));
@@ -58,6 +63,7 @@ public class MainWindow extends JFrame {
         formPanel.add(addButton);
         formPanel.add(completeButton);
 
+        // Set action listeners for buttons
         addButton.addActionListener(e -> {
             addTask(titleField.getText(), descField.getText(), dueDateField.getText());
             titleField.setText("");
@@ -70,6 +76,7 @@ public class MainWindow extends JFrame {
         add(formPanel, BorderLayout.SOUTH);
     }
 
+    // Method to add a new task
     private void addTask(String title, String description, String dueDateString) {
         if (title.isEmpty() || description.isEmpty() || dueDateString.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Error: Text field(s) left empty. Please fill in all fields.");
@@ -89,6 +96,7 @@ public class MainWindow extends JFrame {
         }
     }
 
+    // Method to complete a selected task
     private void completeSelectedTask() {
         int index = taskList.getSelectedIndex();
         if (index != -1) {
@@ -102,10 +110,12 @@ public class MainWindow extends JFrame {
         }
     }
 
+    // Entry point of the program
     public static void main(String[] args) {
         new MainWindow();
     }
 
+    // Method to update the task list in the GUI
     public void updateTaskList(List<Task> tasks) {
         taskListModel.clear();
         for (Task task : tasks) {
@@ -113,6 +123,7 @@ public class MainWindow extends JFrame {
         }
     }
 
+    // Notification method when a task is completed
     public void taskCompletedNotification(String notification) {
         JOptionPane.showMessageDialog(this, notification);
     }
