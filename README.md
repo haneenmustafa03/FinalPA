@@ -1,15 +1,12 @@
 # Project Assignment 3
 # **🧍🏻‍♀️Names:**
 - Andrea Sanchez
-UF ID: 19032711
 Email: andrea.sanchez@ufl.edu
 
 - Natalie Hodnett
-UF ID: 33953973
 Email: nataliehodnett@ufl.edu
 
 - Haneen Mustafa
-UF ID: 98377371
 Email: haneenmustafa@ufl.edu
 
 # **💡Project Idea**
